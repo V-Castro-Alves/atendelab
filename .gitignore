@@ -1,0 +1,13 @@
+# Sistema operacional 
+.DS_Store 
+Thumbs.db 
+# Dependências 
+/vendor/ 
+/node_modules/ 
+# Ambiente 
+.env 
+# Logs 
+*.log 
+# Arquivos temporários 
+*.tmp 
+*.bak 
