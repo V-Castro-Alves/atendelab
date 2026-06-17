@@ -1,79 +1,71 @@
 <?php
-// Carrega o controller responsável pelos endpoints de usuários.
-// Observação: o arquivo no projeto está no singular (UsuariosController.php).
+
+require_once __DIR__ . '/app/Controllers/AuthController.php';
 require_once __DIR__ . '/app/Controllers/UsuariosController.php';
+require_once __DIR__ . '/app/Middleware/auth.php';
 
-// Carrega o controller responsável pelos endpoints de pessoas.
-require_once __DIR__ . '/app/Controllers/PessoasController.php';
+$controller = $_GET['controller'] ?? 'auth';
+$action = $_GET['action'] ?? 'login';
 
-// Define controller e action por query string.
-// Exemplo: ?controller=usuarios&action=listar
-$controller = $_GET['controller'] ?? 'home';
-$action = $_GET['action'] ?? 'index';
+switch ($controller) {
+    case 'auth':
+        $authController = new AuthController();
 
-// Este roteador é simples: só reconhece os controllers "usuarios" e "pessoas".
-if ($controller === 'usuarios') {
-    $usuariosController = new UsuariosController();
+        switch ($action) {
+            case 'login':
+                $authController->exibirLogin();
+                break;
 
-    // Escolhe qual método do controller executar.
-    switch ($action) {
-        case 'listar':
-            $usuariosController->listar();
-            break;
+            case 'entrar':
+                $authController->entrar();
+                break;
 
-        case 'buscar':
-            $usuariosController->buscarPorId();
-            break;
+            case 'dashboard':
+                $authController->dashboard();
+                break;
 
-        case 'criar':
-            $usuariosController->criar();
-            break;
+            case 'logout':
+                $authController->logout();
+                break;
 
-        case 'atualizar':
-            $usuariosController->atualizar();
-            break;
+            default:
+                http_response_code(404);
+                echo 'Acao de autenticacao nao encontrada.';
+        }
+        break;
 
-        case 'excluir':
-            $usuariosController->excluir();
-            break;
+    case 'usuarios':
+        exigirAutenticacao();
+        $usuariosController = new UsuariosController();
 
-        default:
-            // Retorno padrão para action inválida.
-            echo 'Ação de usuários não encontrada.';
-            break;
-    }
-} elseif ($controller === 'pessoas') {
-    $pessoasController = new PessoasController();
+        switch ($action) {
+            case 'listar':
+                $usuariosController->listar();
+                break;
 
-    // Escolhe qual método do controller executar.
-    switch ($action) {
-        case 'listar':
-            $pessoasController->listar();
-            break;
+            case 'buscarPorId':
+                $usuariosController->buscarPorId();
+                break;
 
-        case 'buscar':
-            $pessoasController->buscarPorId();
-            break;
+            case 'criar':
+                $usuariosController->criar();
+                break;
 
-        case 'criar':
-            $pessoasController->criar();
-            break;
+            case 'atualizar':
+                $usuariosController->atualizar();
+                break;
 
-        case 'atualizar':
-            $pessoasController->atualizar();
-            break;
+            case 'excluir':
+                $usuariosController->excluir();
+                break;
 
-        case 'excluir':
-            $pessoasController->excluir();
-            break;
+            default:
+                http_response_code(404);
+                echo 'Acao de usuarios nao encontrada.';
+        }
+        break;
 
-        default:
-            // Retorno padrão para action inválida.
-            echo 'Ação de pessoas não encontrada.';
-            break;
-    }
-} else {
-    // Resposta básica para indicar que a aplicação está no ar.
-    echo '<h1>AtendeLab</h1>';
-    echo '<p>Projeto em execução. Use ?controller=usuarios&action=listar ou ?controller=pessoas&action=listar para testar.</p>';
+    default:
+        http_response_code(404);
+        echo 'Controller nao encontrado.';
 }
