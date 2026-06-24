@@ -19,7 +19,7 @@ class PessoasController
         header('Content-Type: application/json; charset=utf-8');
 
         // Consulta todas as pessoas com ordenação decrescente por ID.
-        $sql = 'SELECT id, nome, documento, email, telefone, status, criado_em
+        $sql = 'SELECT id, nome, documento, email, telefone, status, criado_em, curso, periodo, observacoes
                 FROM pessoas
                 ORDER BY id DESC';
 
@@ -30,7 +30,7 @@ class PessoasController
         echo json_encode($pessoas, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
-    public function buscarPorId(): void
+    public function buscar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
@@ -44,7 +44,7 @@ class PessoasController
         }
 
         // Consulta parametrizada evita SQL Injection.
-        $sql = 'SELECT id, nome, documento, email, telefone, status, criado_em
+        $sql = 'SELECT id, nome, documento, email, telefone, status, criado_em, curso, periodo, observacoes
                 FROM pessoas
                 WHERE id = :id';
 
@@ -73,6 +73,9 @@ class PessoasController
         $email = trim($_POST['email'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
         $status = $_POST['status'] ?? 'ativo';
+        $curso = trim($_POST['curso'] ?? '');
+        $periodo = trim($_POST['periodo'] ?? '');
+        $observacoes = trim($_POST['observacoes'] ?? '');
 
         // Regras mínimas de validação de entrada.
         if ($nome === '') {
@@ -95,8 +98,8 @@ class PessoasController
         }
 
         try {
-            $sql = 'INSERT INTO pessoas (nome, documento, email, telefone, status)
-                    VALUES (:nome, :documento, :email, :telefone, :status)';
+            $sql = 'INSERT INTO pessoas (nome, documento, email, telefone, status, curso, periodo, observacoes)
+                    VALUES (:nome, :documento, :email, :telefone, :status, :curso, :periodo, :observacoes)';
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':nome', $nome);
@@ -104,6 +107,9 @@ class PessoasController
             $stmt->bindValue(':email', $email ?: null);
             $stmt->bindValue(':telefone', $telefone ?: null);
             $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':curso', $curso ?: null);
+            $stmt->bindValue(':periodo', $periodo ?: null);
+            $stmt->bindValue(':observacoes', $observacoes ?: null);
             $stmt->execute();
 
             http_response_code(201);
@@ -129,6 +135,9 @@ class PessoasController
         $email = trim($_POST['email'] ?? '');
         $telefone = trim($_POST['telefone'] ?? '');
         $status = $_POST['status'] ?? 'ativo';
+        $curso = trim($_POST['curso'] ?? '');
+        $periodo = trim($_POST['periodo'] ?? '');
+        $observacoes = trim($_POST['observacoes'] ?? '');
 
         if (!$id || $nome === '') {
             http_response_code(400);
@@ -154,7 +163,10 @@ class PessoasController
                         documento = :documento,
                         email = :email,
                         telefone = :telefone,
-                        status = :status
+                        status = :status,
+                        curso = :curso,
+                        periodo = :periodo,
+                        observacoes = :observacoes
                     WHERE id = :id';
 
             $stmt = $this->pdo->prepare($sql);
@@ -163,6 +175,9 @@ class PessoasController
             $stmt->bindValue(':email', $email ?: null);
             $stmt->bindValue(':telefone', $telefone ?: null);
             $stmt->bindValue(':status', $status);
+            $stmt->bindValue(':curso', $curso ?: null);
+            $stmt->bindValue(':periodo', $periodo ?: null);
+            $stmt->bindValue(':observacoes', $observacoes ?: null);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
@@ -173,7 +188,7 @@ class PessoasController
         }
     }
 
-    public function excluir(): void
+    public function inativar(): void
     {
         header('Content-Type: application/json; charset=utf-8');
 
