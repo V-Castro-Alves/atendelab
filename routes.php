@@ -13,6 +13,133 @@ $controller = $_GET['controller'] ?? 'auth';
 $action = $_GET['action'] ?? 'login';
 
 switch ($controller) {
+    case 'frontend':
+        switch ($action) {
+            case 'pessoas':
+                (new PessoasController())->index();
+                break;
+
+            case 'tipos':
+                (new TiposAtendimentosController())->index();
+                break;
+
+            case 'atendimentos':
+                (new AtendimentosController())->index();
+                break;
+
+            default:
+                http_response_code(404);
+                echo 'Acao de frontend nao encontrada.';
+        }
+        break;
+
+    case 'pessoas':
+        exigirAutenticacao();
+        $pessoasController = new PessoasController();
+
+        switch ($action) {
+            case 'index':
+                $pessoasController->index();
+                break;
+
+            case 'listar':
+                $pessoasController->listar();
+                break;
+
+            case 'buscar':
+                $pessoasController->buscar();
+                break;
+
+            case 'criar':
+                $pessoasController->criar();
+                break;
+
+            case 'atualizar':
+                $pessoasController->atualizar();
+                break;
+
+            case 'inativar':
+                $pessoasController->inativar();
+                break;
+
+            default:
+                http_response_code(404);
+                echo 'Acao de pessoas nao encontrada.';
+        }
+        break;
+
+    case 'tipos-atendimentos':
+    case 'tipos':
+        exigirAutenticacao();
+        $tiposController = new TiposAtendimentosController();
+
+        switch ($action) {
+            case 'index':
+                $tiposController->index();
+                break;
+
+            case 'listar':
+                $tiposController->listar();
+                break;
+
+            case 'buscar':
+                $tiposController->buscar();
+                break;
+
+            case 'criar':
+                $tiposController->criar();
+                break;
+
+            case 'atualizar':
+                $tiposController->atualizar();
+                break;
+
+            case 'inativar':
+                $tiposController->inativar();
+                break;
+
+            default:
+                http_response_code(404);
+                echo 'Acao de tipos nao encontrada.';
+        }
+        break;
+
+    case 'atendimentos':
+        exigirAutenticacao();
+        $atendimentosController = new AtendimentosController();
+
+        switch ($action) {
+            case 'index':
+                $atendimentosController->index();
+                break;
+
+            case 'listar':
+                $atendimentosController->listar();
+                break;
+
+            case 'buscar':
+                $atendimentosController->buscar();
+                break;
+
+            case 'criar':
+                $atendimentosController->criar();
+                break;
+
+            case 'alterarStatus':
+            case 'atualizarStatus':
+                $atendimentosController->alterarStatus();
+                break;
+
+            case 'opcoesFormulario':
+                $atendimentosController->opcoesFormulario();
+                break;
+
+            default:
+                http_response_code(404);
+                echo 'Acao de atendimentos nao encontrada.';
+        }
+        break;
+
     case 'auth':
         $authController = new AuthController();
 
@@ -67,95 +194,6 @@ switch ($controller) {
             default:
                 http_response_code(404);
                 echo 'Acao de usuarios nao encontrada.';
-        }
-        break;
-
-    case 'pessoas':
-        // exigirAutenticacao();
-        $pessoasController = new PessoasController();
-
-        switch ($action) {
-            case 'listar':
-                $pessoasController->listar();
-                break;
-
-            case 'buscar':
-                $pessoasController->buscar();
-                break;
-
-            case 'criar':
-                $pessoasController->criar();
-                break;
-
-            case 'atualizar':
-                $pessoasController->atualizar();
-                break;
-
-            case 'inativar':
-                $pessoasController->inativar();
-                break;
-
-            default:
-                http_response_code(404);
-                echo 'Acao de pessoas nao encontrada.';
-        }
-        break;
-
-    case 'tipos':
-        // exigirAutenticacao();
-        $tiposController = new TiposAtendimentosController();
-
-        switch ($action) {
-            case 'listar':
-                $tiposController->listar();
-                break;
-
-            case 'buscar':
-                $tiposController->buscar();
-                break;
-
-            case 'criar':
-                $tiposController->criar();
-                break;
-
-            case 'atualizar':
-                $tiposController->atualizar();
-                break;
-
-            case 'inativar':
-                $tiposController->inativar();
-                break;
-
-            default:
-                http_response_code(404);
-                echo 'Acao de tipos nao encontrada.';
-        }
-        break;
-
-    case 'atendimentos':
-        // exigirAutenticacao();
-        $atendimentosController = new AtendimentosController();
-
-        switch ($action) {
-            case 'listar':
-                $atendimentosController->listar();
-                break;
-
-            case 'buscar':
-                $atendimentosController->buscar();
-                break;
-
-            case 'criar':
-                $atendimentosController->criar();
-                break;
-
-            case 'alterarStatus':
-                $atendimentosController->alterarStatus();
-                break;
-
-            default:
-                http_response_code(404);
-                echo 'Acao de atendimentos nao encontrada.';
         }
         break;
 

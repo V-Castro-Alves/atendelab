@@ -13,6 +13,17 @@ class TiposAtendimentosController
         $this->pdo = $pdo;
     }
 
+    public function index(): void
+    {
+        exigirAutenticacao();
+
+        $usuario = usuarioAtual();
+        $controllerAtual = 'tipos-atendimentos';
+        $tituloPagina = 'Tipos de atendimento';
+
+        require __DIR__ . '/../Views/tipos-atendimentos/index.php';
+    }
+
     public function listar(): void
     {
         // Define saída em JSON para APIs/consumo por front-end.

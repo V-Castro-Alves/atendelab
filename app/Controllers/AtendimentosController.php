@@ -13,6 +13,17 @@ class AtendimentosController
         $this->pdo = $pdo;
     }
 
+    public function index(): void
+    {
+        exigirAutenticacao();
+
+        $usuario = usuarioAtual();
+        $controllerAtual = 'atendimentos';
+        $tituloPagina = 'Atendimentos';
+
+        require __DIR__ . '/../Views/atendimentos/index.php';
+    }
+
     public function listar(): void
     {
         header('Content-Type: application/json; charset=utf-8');

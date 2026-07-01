@@ -13,6 +13,17 @@ class PessoasController
         $this->pdo = $pdo;
     }
 
+    public function index(): void
+    {
+        exigirAutenticacao();
+
+        $usuario = usuarioAtual();
+        $controllerAtual = 'pessoas';
+        $tituloPagina = 'Pessoas atendidas';
+
+        require __DIR__ . '/../Views/pessoas/index.php';
+    }
+
     public function listar(): void
     {
         // Define saída em JSON para APIs/consumo por front-end.
