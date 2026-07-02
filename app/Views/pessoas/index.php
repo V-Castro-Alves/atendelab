@@ -19,8 +19,8 @@ require __DIR__ . '/../layouts/header.php';
             <input type="hidden" name="id" id="pessoaId">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Nome *</label><input class="form-control" name="nome" required></div>
-                <div class="col-md-3"><label class="form-label">Documento *</label><input class="form-control" name="documento" required></div>
-                <div class="col-md-3"><label class="form-label">Telefone</label><input class="form-control" name="telefone"></div>
+                    <div class="col-md-3"><label class="form-label">Documento *</label><input class="form-control" name="documento" maxlength="11" inputmode="numeric" pattern="\d{11}" title="Informe 11 dígitos do CPF" required></div>
+                    <div class="col-md-3"><label class="form-label">Telefone</label><input class="form-control" name="telefone" inputmode="numeric" maxlength="15" placeholder="(47) 99999-9999"></div>
                 <div class="col-md-6"><label class="form-label">E-mail *</label><input class="form-control" type="email" name="email" required></div>
                 <div class="col-md-3"><label class="form-label">Curso</label><input class="form-control" name="curso"></div>
                 <div class="col-md-3"><label class="form-label">Período</label><input class="form-control" name="periodo"></div>
@@ -69,6 +69,43 @@ function abrirFormulario() { cardFormulario.classList.remove('d-none'); window.s
 function fecharFormulario() { cardFormulario.classList.add('d-none'); formPessoa.reset(); document.getElementById('pessoaId').value = ''; }
 function novaPessoa() { fecharFormulario(); document.getElementById('tituloFormulario').textContent = 'Nova pessoa'; abrirFormulario(); }
 
+function formatarDocumento(valor) {
+    return String(valor ?? '').replace(/\D+/g, '').slice(0, 11);
+}
+
+function formatarTelefone(valor) {
+    const digitos = String(valor ?? '').replace(/\D+/g, '').slice(0, 11);
+
+    if (!digitos) {
+        return '';
+    }
+
+    if (digitos.length <= 2) {
+        return `(${digitos}`;
+    }
+
+    if (digitos.length <= 7) {
+        return `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+    }
+
+    return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+}
+
+const documentoInput = document.querySelector('[name="documento"]');
+const telefoneInput = document.querySelector('[name="telefone"]');
+
+if (documentoInput) {
+    documentoInput.addEventListener('input', event => {
+        event.target.value = formatarDocumento(event.target.value);
+    });
+}
+
+if (telefoneInput) {
+    telefoneInput.addEventListener('input', event => {
+        event.target.value = formatarTelefone(event.target.value);
+    });
+}
+
 async function carregarPessoas() {
     try {
         const dados = AtendeLabApi.toList(await AtendeLabApi.get('pessoas', 'listar'));
@@ -96,6 +133,17 @@ async function editarPessoa(id) {
         for (const [key, value] of Object.entries(p)) {
             const field = formPessoa.elements.namedItem(key);
             if (field) field.value = value ?? '';
+        }
+
+        const documento = formPessoa.elements.namedItem('documento');
+        const telefone = formPessoa.elements.namedItem('telefone');
+
+        if (documento) {
+            documento.value = formatarDocumento(documento.value);
+        }
+
+        if (telefone) {
+            telefone.value = formatarTelefone(telefone.value);
         }
     } catch (error) { AtendeLabApi.showAlert('alerta', error.message, 'danger'); }
 }

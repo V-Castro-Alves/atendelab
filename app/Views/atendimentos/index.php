@@ -203,6 +203,49 @@ function labelRegistro(obj, ...keys) {
     return '';
 }
 
+function formatarDataHoraBR(dataValor, horaValor = '') {
+    if (!dataValor && !horaValor) {
+        return '';
+    }
+
+    const dataTexto = String(dataValor ?? '').trim();
+    const horaTexto = String(horaValor ?? '').trim();
+
+    const dataPartes = dataTexto.split(' ')[0].split('-');
+    const horaPartes = horaTexto.split(':');
+
+    let data = null;
+
+    if (dataPartes.length === 3) {
+        const ano = Number(dataPartes[0]);
+        const mes = Number(dataPartes[1]) - 1;
+        const dia = Number(dataPartes[2]);
+        const hora = Number(horaPartes[0] || '0');
+        const minuto = Number(horaPartes[1] || '0');
+
+        data = new Date(ano, mes, dia, hora, minuto, 0);
+    } else {
+        const texto = horaTexto
+            ? `${dataTexto.replace(' ', 'T')}T${horaTexto}`
+            : dataTexto.replace(' ', 'T');
+
+        data = new Date(texto);
+    }
+
+    if (Number.isNaN(data.getTime())) {
+        return [dataValor, horaValor].filter(Boolean).join(' ');
+    }
+
+    const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short'
+    }).format(data);
+    const horaFormatada = new Intl.DateTimeFormat('pt-BR', {
+        timeStyle: 'short'
+    }).format(data);
+
+    return `${dataFormatada} as ${horaFormatada}`;
+}
+
 async function carregarCombos() {
     const [pessoasResp, tiposResp] = await Promise.all([
         AtendeLabApi.get('pessoas', 'listar'),
@@ -281,6 +324,12 @@ async function carregarAtendimentos() {
                 'data'
             );
 
+            const horario = labelRegistro(
+                atendimento,
+                'horario_atendimento',
+                'horario'
+            );
+
             const classeStatus =
                 atendimento.status === 'concluido'
                     ? 'text-bg-success'
@@ -294,7 +343,7 @@ async function carregarAtendimentos() {
                     <td>${AtendeLabApi.escape(pessoa)}</td>
                     <td>${AtendeLabApi.escape(tipo)}</td>
                     <td>${AtendeLabApi.escape(responsavel)}</td>
-                    <td>${AtendeLabApi.escape(data)}</td>
+                    <td>${AtendeLabApi.escape(formatarDataHoraBR(data, horario))}</td>
                     <td>
                         <span class="badge ${classeStatus}">
                             ${AtendeLabApi.escape(atendimento.status)}
@@ -348,13 +397,37 @@ function abrirStatus(id, status) {
     document.querySelector('#formStatus [name="status"]').value =
         status || 'aberto';
 
-    document.querySelector('#formStatus [name="observacao_final"]').value = '';
+    const observacaoFinal = document.querySelector('#formStatus [name="observacao_final"]');
+    observacaoFinal.value = '';
+    observacaoFinal.required = false;
 
     statusModal().show();
 }
 
+document.querySelector('#formStatus [name="status"]').addEventListener('change', event => {
+    const observacaoFinal = document.querySelector('#formStatus [name="observacao_final"]');
+    const deveExigirObservacao = event.target.value === 'concluido';
+
+    observacaoFinal.required = deveExigirObservacao;
+
+    if (!deveExigirObservacao) {
+        observacaoFinal.setCustomValidity('');
+    }
+});
+
 document.getElementById('formStatus').addEventListener('submit', async event => {
     event.preventDefault();
+
+    const status = document.querySelector('#formStatus [name="status"]').value;
+    const observacaoFinal = document.querySelector('#formStatus [name="observacao_final"]');
+
+    if (status === 'concluido' && observacaoFinal.value.trim() === '') {
+        observacaoFinal.setCustomValidity('A observação final é obrigatória ao concluir o atendimento.');
+        observacaoFinal.reportValidity();
+        return;
+    }
+
+    observacaoFinal.setCustomValidity('');
 
     try {
         await AtendeLabApi.post(

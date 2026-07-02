@@ -29,7 +29,7 @@ class AuthController
         }
 
         // Recupera mensagens temporárias da sessão.
-        $erro = $_SESSION['erro_login'] ?? null;
+        $erroLogin = $_SESSION['erro_login'] ?? null;
         $mensagem = $_SESSION['mensagem'] ?? null;
 
         // Remove as mensagens para que apareçam somente uma vez.

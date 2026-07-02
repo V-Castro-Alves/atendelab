@@ -194,6 +194,12 @@ class AtendimentosController
             return;
         }
 
+        if ($status === 'concluido' && $observacao_final === '') {
+            http_response_code(400);
+            echo json_encode(['erro' => 'A observação final é obrigatória ao concluir o atendimento.']);
+            return;
+        }
+
         try {
             $sql = 'UPDATE atendimentos
                     SET status = :status,

@@ -6,6 +6,42 @@ class PessoasController
     // Conexão PDO reutilizada em todos os métodos.
     private PDO $pdo;
 
+    private function somenteDigitos(?string $valor): string
+    {
+        return preg_replace('/\D+/', '', $valor ?? '') ?? '';
+    }
+
+    private function formatarTelefone(string $digitos): string
+    {
+        return sprintf('(%s) %s-%s', substr($digitos, 0, 2), substr($digitos, 2, 5), substr($digitos, 7, 4));
+    }
+
+    private function validarDocumento(string $documento): ?string
+    {
+        if ($documento === '') {
+            return null;
+        }
+
+        if (strlen($documento) !== 11) {
+            return 'Documento deve conter 11 dígitos do CPF.';
+        }
+
+        return null;
+    }
+
+    private function validarTelefone(string $telefone): ?string
+    {
+        if ($telefone === '') {
+            return null;
+        }
+
+        if (strlen($telefone) !== 11) {
+            return 'Telefone deve conter DDD e número no formato (47) 99999-9999.';
+        }
+
+        return null;
+    }
+
     public function __construct()
     {
         // Importa o arquivo que inicializa o objeto $pdo.
@@ -95,6 +131,21 @@ class PessoasController
             return;
         }
 
+        $documento = $this->somenteDigitos($documento);
+        $telefone = $this->somenteDigitos($telefone);
+
+        if ($erroDocumento = $this->validarDocumento($documento)) {
+            http_response_code(400);
+            echo json_encode(['erro' => $erroDocumento]);
+            return;
+        }
+
+        if ($erroTelefone = $this->validarTelefone($telefone)) {
+            http_response_code(400);
+            echo json_encode(['erro' => $erroTelefone]);
+            return;
+        }
+
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['erro' => 'E-mail inválido.']);
@@ -116,7 +167,7 @@ class PessoasController
             $stmt->bindValue(':nome', $nome);
             $stmt->bindValue(':documento', $documento ?: null);
             $stmt->bindValue(':email', $email ?: null);
-            $stmt->bindValue(':telefone', $telefone ?: null);
+            $stmt->bindValue(':telefone', $telefone ? $this->formatarTelefone($telefone) : null);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':curso', $curso ?: null);
             $stmt->bindValue(':periodo', $periodo ?: null);
@@ -156,6 +207,21 @@ class PessoasController
             return;
         }
 
+        $documento = $this->somenteDigitos($documento);
+        $telefone = $this->somenteDigitos($telefone);
+
+        if ($erroDocumento = $this->validarDocumento($documento)) {
+            http_response_code(400);
+            echo json_encode(['erro' => $erroDocumento]);
+            return;
+        }
+
+        if ($erroTelefone = $this->validarTelefone($telefone)) {
+            http_response_code(400);
+            echo json_encode(['erro' => $erroTelefone]);
+            return;
+        }
+
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['erro' => 'E-mail inválido.']);
@@ -184,7 +250,7 @@ class PessoasController
             $stmt->bindValue(':nome', $nome);
             $stmt->bindValue(':documento', $documento ?: null);
             $stmt->bindValue(':email', $email ?: null);
-            $stmt->bindValue(':telefone', $telefone ?: null);
+            $stmt->bindValue(':telefone', $telefone ? $this->formatarTelefone($telefone) : null);
             $stmt->bindValue(':status', $status);
             $stmt->bindValue(':curso', $curso ?: null);
             $stmt->bindValue(':periodo', $periodo ?: null);
